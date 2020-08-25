@@ -4,7 +4,7 @@ const iniciar = () => {
   rl.question('Olá, estimad@ cliente! Bem-vind@ a nossa feira! O que gostaria de fazer?\n[1] Consultar produto\n[2] Ver sacola\n[3] Fechar compra\n[4] Sair\nSua resposta: ', (resposta) => {
 
     if(resposta === '1') {
-      procuraFruta(vendinhaDeFrutas);
+      procuraFruta();
     } else if(resposta === '2') {
       verSacola();
     } else if(resposta === '3'){
@@ -20,27 +20,30 @@ const iniciar = () => {
   })
 }
 //Função que localiza e indica existência do produto
-const procuraFruta = (vendinhaDeFrutas) => {
+const procuraFruta = () => {
   rl.question('Muito bem! Qual produto você gostaria de encontrar?\nSua resposta: ', (resposta) => {
 
     let flag = false;
-    for(let i = 0; i < vendinhaDeFrutas.length; i++){
+    for(let i = 0; i < vendinhaDeFrutas.length; i++) {
       if(resposta === vendinhaDeFrutas[i].nome){
         console.log('Achei aqui o(a) ' + chalk.greenBright(`${resposta}!`))
         console.log(`Ainda temos ${vendinhaDeFrutas[i].quant} unidade(s) e a unidade custa ${vendinhaDeFrutas[i].preco}`)
         flag = true;
-        rl.question('O que deseja fazer com o produto?\n[1] Adicionar à sacola\n[2] Sair\nSua resposta: ', (resposta) => {
+        rl.question('O que deseja fazer com o produto?\n[1] Adicionar à sacola\n[2] Voltar\nSua resposta: ', (resposta) => {
           if(resposta === '1'){
             rl.question('Qual a quantidade deseja adicionar?\nSua resposta: ', (resposta) =>{
               if(resposta > vendinhaDeFrutas[i].quant) {
                 console.log('Não temos a quantidade que você deseja...Tente novamente!')
-                procuraFruta(vendinhaDeFrutas)
+                procuraFruta()
               } else {
-                addMinhaSacola(vendinhaDeFrutas[i].id, vendinhaDeFrutas[i].nome, Number(vendinhaDeFrutas[i].quant), Number(vendinhaDeFrutas[i].preco));
+                atualizaSacola(vendinhaDeFrutas[i].id, vendinhaDeFrutas[i].nome, Number(resposta), Number(vendinhaDeFrutas[i].preco));
                 vendinhaDeFrutas[i].quant -= Number(resposta)
                 iniciar();
               }
             })
+          } else{
+            rl.close();
+            iniciar()
           }
         })
       }
@@ -50,7 +53,7 @@ const procuraFruta = (vendinhaDeFrutas) => {
       console.log('Não consegui achar ' +  chalk.redBright(`${resposta}`) + '!')
       rl.question('Deseja procurar outro produto?\n[1]Sim\n[2]Não\nSua resposta: ', (resposta) => {
         if(resposta === '1') {
-          return procuraFruta(vendinhaDeFrutas);
+          return procuraFruta();
         } else{
           rl.close();
           return console.log('Agradecemos a sua visita!');
@@ -60,21 +63,16 @@ const procuraFruta = (vendinhaDeFrutas) => {
    })
 }
 
-const addMinhaSacola = (id, nome, quant, preco) => {
+let  produtos = [];
+
+const atualizaSacola = (id, nome, quant, preco) => {
+  
   const produto = {
     id: id, 
     nome: nome,
     quant: Number(quant),
     preco: Number(preco)
   };
-
-  checarSacola(produto)
-  const produtos = [];
-}
-
-const checarSacola = (produto) => {
-  
-  const produtos = verSacola();
 
   if(produtos.length === 0){
     produtos.push(produto);
@@ -87,22 +85,19 @@ const checarSacola = (produto) => {
       }
     }
   }
-  return produtos;
+  verSacola()
 }
 
 
 const verSacola = () => {
-  const produtos = []
-
-  if(typeof produtos.length === 0){
+  
+  if(produtos.length === 0){
     console.log('Sua sacola ainda está vazia! Vamos comprar!\n')
     iniciar()
   } else{
-    console.log(produtos);
+    console.log(`${produtos}\n`);
     iniciar()
   }
-
-
 }
   
 
