@@ -33,17 +33,20 @@ const procuraFruta = () => {
           if(resposta === '1'){
             rl.question('Qual a quantidade deseja adicionar?\nSua resposta: ', (resposta) =>{
               if(resposta > vendinhaDeFrutas[i].quant) {
-                console.log('Não temos a quantidade que você deseja...Tente novamente!')
-                procuraFruta()
+                console.log('Não temos a quantidade que você deseja...Tente novamente!');
+                procuraFruta();
+              } else if (vendinhaDeFrutas[i].quant === 0){
+                console.log('Não temos mais esse produto no nosso estoque. Tente novamente')
+                procuraFruta();
               } else {
                 atualizaSacola(vendinhaDeFrutas[i].id, vendinhaDeFrutas[i].nome, Number(resposta), Number(vendinhaDeFrutas[i].preco));
-                vendinhaDeFrutas[i].quant -= Number(resposta)
+                vendinhaDeFrutas[i].quant -= Number(resposta);
                 iniciar();
               }
             })
           } else{
-            rl.close();
-            iniciar()
+
+            iniciar();
           }
         })
       }
@@ -53,7 +56,7 @@ const procuraFruta = () => {
       console.log('Não consegui achar ' +  chalk.redBright(`${resposta}`) + '!')
       rl.question('Deseja procurar outro produto?\n[1]Sim\n[2]Não\nSua resposta: ', (resposta) => {
         if(resposta === '1') {
-          return procuraFruta();
+          procuraFruta();
         } else{
           rl.close();
           return console.log('Agradecemos a sua visita!');
@@ -62,7 +65,7 @@ const procuraFruta = () => {
     }
    })
 }
-
+//Definindo array global
 let  produtos = [];
 
 const atualizaSacola = (id, nome, quant, preco) => {
@@ -73,21 +76,23 @@ const atualizaSacola = (id, nome, quant, preco) => {
     quant: Number(quant),
     preco: Number(preco)
   };
-
+  
   if(produtos.length === 0){
     produtos.push(produto);
   } else{
     for(let i = 0; i < produtos.length; i++){
-      if(produtos[i].id === produto.id){
+      console.log(produtos[i].id, produto.id)
+      if(Number(produtos[i].id) === Number(produto.id)){
         produtos[i].quant += produto.quant;
+        break;//Condição de parada se não ele continua para sempre
       } else{
         produtos.push(produto);
+        break;
       }
     }
   }
   verSacola()
 }
-
 
 const verSacola = () => {
   
@@ -95,11 +100,36 @@ const verSacola = () => {
     console.log('Sua sacola ainda está vazia! Vamos comprar!\n')
     iniciar()
   } else{
-    console.log(`${produtos}\n`);
+    for(let i = 0; i < produtos.length; i++){
+      console.log(produtos[i]);
+    }
     iniciar()
   }
 }
-  
+
+const fechaCompra = () => {
+  let somaTotal = 0;
+  if(produtos.length === 0){
+    console.log('Sua sacola está vazia... tente novamente!');
+    iniciar();
+  } else {
+    console.log('Vejamos o que temos na sacola!')
+    for(let i = 0; i < produtos.length; i++){
+      console.log(`Item: ${produtos[i].nome}\nQuant: ${produtos[i].quant}\nPreço:${produtos[i].preco}\nSubtotal: ${produtos[i].preco * produtos[i].quant}`)
+      somaTotal += produtos[i].quant * produtos[i].preco;
+    }
+    rl.question(`O total foi de: ${somaTotal}. Aceitamos apenas dinheiro. Quantia dada: `, (resposta) => {
+      if(Number(resposta) - Number(somaTotal) === 0){
+        console.log('Tudo certo! Muito obrigado e volte sempre!')
+        rl.close()
+      } else{
+        console.log(`Aqui está seu troco: R$${Number(resposta) - Number(somaTotal)}`);
+        console.log('Obrigado pela preferência! Volte sempre!')
+        rl.close()
+      }
+    })
+  }
+}
 
 //Declarando variáveis
 //Requisição de pacotes
@@ -138,11 +168,5 @@ const vendinhaDeFrutas = [
     quant: 20
   }
 ]
-
 //Iniciando programa
 iniciar()
-
-//Perguntas: como implementar as funções de adicionar item à sacola, 
-//checar sacola(se item adicionado) já existe e
-//exibir sacola
-//Como escrever função de fechar compra?
